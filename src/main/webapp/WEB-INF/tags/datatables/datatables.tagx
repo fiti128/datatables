@@ -1,0 +1,421 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:fn="http://java.sun.com/jsp/jstl/functions" 
+	xmlns:spring="http://www.springframework.org/tags" xmlns:field="urn:jsptagdir:/WEB-INF/tags/form/fields" version="2.0">
+
+  <jsp:output omit-xml-declaration="yes"/>
+  
+  <spring:url value="/resources/js/datatables/jquery.dataTables.js" var="dataTables_url"/>
+  <spring:url value="/resources/js/datatables/jquery.dataTables.columnFilter.js" var="dataTables_columnFilter_url"/>
+  <spring:url value="/resources/js/datatables/jquery.dataTables.fourButton.js" var="dataTables_fourButton_url"/>
+  <spring:url value="/resources/styles/jquery.dataTables.css" var="dataTables_styles_url"/>
+  <link href="${dataTables_styles_url}" rel="stylesheet" type="text/css"/>
+  <script src="${dataTables_url}" type="text/javascript"><!-- required for FF3 and Opera --></script>
+  <script src="${dataTables_columnFilter_url}" type="text/javascript"><!-- required for FF3 and Opera --></script>
+  <script src="${dataTables_fourButton_url}" type="text/javascript"><!-- required for FF3 and Opera --></script>
+  <script language="JavaScript" type="text/javascript">dojo.require("dijit.form.DateTextBox");</script>
+
+  <jsp:directive.attribute name="id" type="java.lang.String" required="true" rtexprvalue="true" description="The identifier for this tag (do not change!)" />
+  <jsp:directive.attribute name="path" type="java.lang.String" required="true" rtexprvalue="true" description="Specify the URL path" />
+  <jsp:directive.attribute name="typeIdFieldName" type="java.lang.String" required="false" rtexprvalue="true" description="The identifier field name for the type (defaults to 'id')" />
+  <jsp:directive.attribute name="render" type="java.lang.Boolean" required="false" rtexprvalue="true" description="Indicate if the contents of this tag and all enclosed tags should be rendered (default 'true')" />
+  <jsp:directive.attribute name="create" type="java.lang.Boolean" required="false" rtexprvalue="true" description="Include 'create' link into table (default true)" />
+  <jsp:directive.attribute name="show" type="java.lang.Boolean" required="false" rtexprvalue="true" description="Include 'show' link into table (default true)" />
+  <jsp:directive.attribute name="update" type="java.lang.Boolean" required="false" rtexprvalue="true" description="Include 'update' link into table (default true)" />
+  <jsp:directive.attribute name="delete" type="java.lang.Boolean" required="false" rtexprvalue="true" description="Include 'delete' link into table (default true)" />
+  <jsp:directive.attribute name="pathCreate" type="java.lang.String" required="false" rtexprvalue="true" description="Specify the URL path for create operation" />
+  <jsp:directive.attribute name="fnRowCallback" type="java.lang.String" required="false" rtexprvalue="true" description="This function allows to 'post process' each row after it have been generated for each table draw, but before it is rendered on screen. &lt;br/&gt;Inputs: &lt;br/&gt;  1. {node} TR element for the current row &lt;br/&gt;  2. {array} Raw data array for this row &lt;br/&gt;  3. {int} The display index for the current table draw &lt;br/&gt;  4. {int} The index of the data in the full list of rows (after filtering) " />
+  <jsp:directive.attribute name="extraData" type="java.lang.String" required="false" rtexprvalue="true" description="Used to send extra data to server. See fnServerParams in datatables docs" />
+  <jsp:directive.attribute name="z" type="java.lang.String" required="false" description="Used for checking if element has been modified (to recalculate simply provide empty string value)" />
+  
+  <c:if test="${empty render or render}">
+	<spring:url value="${path}?data" var="data_url" />
+	<c:set var="columnProperties" scope="request" />
+    <c:set var="columnLabels" scope="request" />
+    <c:set var="columnSelectFiltersValues" scope="request" />
+    
+  <jsp:doBody />
+    <c:if test="${empty extraData}">
+      <c:set var="extraData" value="null" />
+    </c:if>
+    <c:if test="${empty typeIdFieldName}">
+      <c:set var="typeIdFieldName" value="id" />
+    </c:if>
+    <c:if test="${empty show}">
+      <c:set var="show" value="false" />
+    </c:if>
+    <c:if test="${empty update}">
+      <c:set var="update" value="false" />
+    </c:if>
+    <c:if test="${empty delete}">
+      <c:set var="delete" value="false" />
+    </c:if>
+    
+	<spring:url value="/resources/images/show.png" var="show_image_url" />
+	<spring:url value="/resources/images/delete.png" var="delete_image_url" />
+    
+    <c:set var="lengths" value="${fn:split(columnMaxLengths, '&#9999;')}" scope="request" />
+    <c:set var="types" value="${fn:split(columnTypes, '&#9999;')}" scope="request" />
+    <c:set var="patterns" value="${fn:split(columnDatePatterns, '&#9999;')}" scope="request" />
+    <c:set var="filters" value="${fn:split(columnFilters, '&#9999;')}" scope="request" />
+    <c:set var="selectsValues" value="${fn:split(columnSelectFiltersValues, '&#9999;')}" scope="request" />
+    <c:set var="labels" value="${fn:split(columnLabels, '&#9999;')}" scope="request" />
+    <c:set var="sorts" value="${fn:split(columnSorts, '&#9999;')}" scope="request" />
+    <c:set var="widths" value="${fn:split(columnWidths, '&#9999;')}" scope="request" />
+
+    <c:set var="propertiesArray" value="[" />
+    <!-- For nested tables to expand with nodes
+   <c:set var="openNode">
+		'<img src="${show_image_url}"/>'
+   </c:set>
+    <c:set var="propertiesArray" value='${propertiesArray}{"sClass": "openNode","mDataProp": null,"bSortable":false,"sDefaultContent": ${openNode}},' />
+     -->
+	<c:forTokens items="${columnProperties}" delims="${'&#9999;'}" var="column" varStatus="num">
+	  	<c:set var="sort" value="${sorts[num.count-1]}" />
+        <c:set var="columnType" value="${types[num.count-1]}" />
+        <c:set var="columnDatePattern" value="${patterns[num.count-1]}" />
+        <c:set var="width" value="${widths[num.count-1]}" />
+        <c:set var="sClass" value=""/>
+		<!--<c:set var="columnMaxLength" value="${lengths[num.count-1]}" /> -->
+        
+          <c:choose>
+            <c:when test="${columnType eq 'date'}">
+                <c:set var="type" value="date" />
+            	<c:set var="fnRenderRet" value='(val) ? $.datepicker.formatDate("dd/mm/yy", new Date(parseInt(val))) : ""' />
+            	<c:set var="sClass" value="alignCenter"/>
+            </c:when>
+            <c:otherwise>
+              <c:set var="type" value="string" />
+              <c:set var="fnRenderRet" value="val" />
+              <c:set var="sClass" value="alignLeft"/>
+            </c:otherwise>
+          </c:choose>
+          <!-- 
+       <c:set var="propertiesArray"><![CDATA[ 
+        ${propertiesArray}{"sName": "${column}","sWidth": "${width}","sClass": "${sClass}","sType": "${type}","mDataProp": "${column}","bSortable":${sort},"fnRender": function (o, val) {return ${fnRenderRet};}}, 
+       ]]></c:set>
+          -->
+          
+          <c:set var="propertiesArray" value='${propertiesArray}{"sName": "${column}","sWidth": "${width}","sClass": "${sClass}","sType": "${type}","mDataProp": "${column}","bSortable":${sort},"fnRender": function (o, val) {return ${fnRenderRet};}},' />
+    </c:forTokens>
+    <c:if test="${update}">
+        <spring:url value="${path}" var="update_form_url"/>
+        <spring:message arguments="${typeName}" code="entity_update" var="update_label" htmlEscape="false" />
+        <spring:url value="/resources/images/update.png" var="update_image_url" />
+           <!-- 
+   		<c:set var="fnRenderRet">
+ 			<![CDATA[ $('<a>',{
+ 								title: 'update_label',
+ 								href: '${update_form_url}/'+val+'?form'
+ 							})
+ 							.append('<img alt="update_label" class="image" src="${update_image_url}" title="update_label" />')
+ 							.get(0).outerHTML
+ 			]]>
+      	</c:set>
+      	<c:set var="propertiesArray" value='${propertiesArray}{"sName": "${column}","sWidth": "${width}","sClass": "${sClass}","sType": "${type}","mDataProp": "${column}","bSortable":${sort},"fnRender": function (o, val) {return ${fnRenderRet};}},' /> 
+     -->
+	</c:if>
+    <c:set var="propertiesArray" value="${fn:substring(propertiesArray, 0, fn:length(propertiesArray)-1) }" />
+    <c:set var="propertiesArray" value="${propertiesArray}]"/>
+    
+    <c:if test="${empty fnRowCallback}">
+    	<c:set var="fnRowCallback" value="function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {}"/>
+    </c:if>
+    
+    <!-- Filters -->
+    <c:set var="filtersArray" value="["/>
+    
+    <c:forTokens items="${columnProperties}" delims="${'&#9999;'}" var="column" varStatus="num">
+       <!--<c:set var="columnMaxLength" value="${lengths[num.count-1]}" />
+       <c:set var="columnDatePattern" value="${patterns[num.count-1]}" />
+       <c:set var="label" value="${labels[num.count-1]}" />
+       -->
+       <c:set var="filter" value="${filters[num.count-1]}" />
+       <c:set var="selectValues" value="${selectsValues[num.count-1]}" />
+       <c:choose>
+         <c:when test="${filter eq 'none'}">
+           <c:set var="filtersArray" value='${filtersArray}null,'/>
+         </c:when>
+         <c:when test="${filter eq 'select'}"><!-- TODO CHECK IF EMPTY -->
+           <c:set var="filtersArray" value='${filtersArray}{type: "${filter}", "values": ${selectValues}},'/>
+         </c:when>
+         <c:otherwise>
+    	   <c:set var="filtersArray" value='${filtersArray}{type: "${filter}"},'/>
+         </c:otherwise>
+       </c:choose>
+    </c:forTokens>
+   	<c:if test="${show}">
+     	<c:set var="filtersArray" value='${filtersArray}null,'/>
+   	</c:if>
+   	<c:if test="${update}">
+     	<c:set var="filtersArray" value='${filtersArray}null,'/>
+   	</c:if>
+   	<c:if test="${delete}">
+     	<c:set var="filtersArray" value='${filtersArray}null,'/>
+   	</c:if>
+   	<c:set var="filtersArray" value="${fn:substring(filtersArray, 0, fn:length(filtersArray)-1) }" />
+    <c:set var="filtersArray" value="${filtersArray}]"/>
+    <!-- End Filters -->
+    
+	<script type="text/javascript" charset="utf-8">
+	<![CDATA[
+		var asInitVals = new Array();
+		var data_url_${id} = "${data_url}";
+        var o${id};
+        
+		$(document).ready(function() {
+			
+			var anOpen = [];
+			var stringify_aoData = function(aoData) {
+	            var o = {};
+	            var modifiers = ['mDataProp_', 'sSearch_', 'iSortCol_', 'bSortable_', 'bRegex_', 'bSearchable_', 'sSortDir_'];
+	            jQuery.each(aoData, function(index,obj) {
+	                if (obj.name) {
+	                	jQuery.each(modifiers, function(i, modifier) {
+	                		if (obj.name.substring(0, modifier.length) == modifier) {
+	                            var index = parseInt(obj.name.substring(modifier.length));
+	                            var key = 'a' + modifier.substring(0, modifier.length-1);
+	                            if (!o[key]) {
+	                                o[key] = [];
+	                            }
+	                            //console.log('index=' + index);
+	                            o[key][index] = obj.value;
+	                            //console.log(key + ".push(" + obj.value + ")");
+	                            return;
+	                        }
+	                	});
+	                    
+	                    //console.log(obj.name+"=" + obj.value);
+	                    o[obj.name] = obj.value;
+	                }
+	                else {
+	                    o[index] = obj;
+	                }
+	            });
+
+	            /* Find by Example object */
+	    		var amDataProp = o.amDataProp;
+	    		var asSearch = o.asSearch;
+	    		var searchExampleObj = {};
+	    		
+	    		/* Date intervals handling */
+	    		var msIntervals = new Object(); /* Map<String,Map<String, String>> */
+	    		
+	    		jQuery.each(amDataProp, function(i, prop) {
+            			var filterValue = asSearch[i];
+            			if (filterValue) {
+            				searchExampleObj[prop] = filterValue;
+            			}
+            			else {
+            				searchExampleObj[prop] = null;
+            			}
+            			
+            			if (filterValue && filterValue.indexOf('&#9999;') >= 0) {
+            				searchExampleObj[prop] = null;
+            				var dates = filterValue.split('&#9999;');
+            				
+            				var dStartDate = null;
+            				var dEndDate = null;
+            				
+            				if(dates[0] && dates[0] != 'undefined') {
+            					dStartDate = $.datepicker.parseDate('dd/mm/yy', dates[0]);
+            				} else {
+            					dates[0] = null;
+            				}
+            				if(dates[1] && dates[1] != 'undefined') {
+    	        				dEndDate = $.datepicker.parseDate('dd/mm/yy', dates[1]);
+            				} else {
+            					dates[1] = null;
+            				}
+            				
+            				msIntervals[prop] = {"start": dates[0], "end": dates[1]};
+            				
+            				if (dStartDate != null && dEndDate != null && dEndDate.getTime() < dStartDate.getTime()) {
+            	            	alert('Invalid date interval');
+            	            	return;
+            	            }
+            			}
+            			
+            			//console.log(searchExampleObj);
+                        return;
+            	});
+	    		o["searchObj"] = searchExampleObj;
+	    		o["msIntervals"] = msIntervals;
+	    		
+	            return JSON.stringify(o);
+	        };
+	        
+	        var aSelected = [];
+	        o${id} = $('#${id}').dataTable( {
+	        	"aaSorting": [],
+ 		        "bJQueryUI": false,
+		        "bRetrieve": true,
+		        "bDestroy":true,
+		        "bAutoWidth": false,
+		        "sDom": '<"top">rt<"bottom"lip><"clear">', 
+		        "aoColumns": ${propertiesArray},
+		        "bPaginate": true,
+		        "sPaginationType": "four_button",
+		        "sLengthMenuSelect": false,
+		        "oLanguage": {
+		        	 "oPaginate": {
+			                "sFirst": "",
+			                "sLast": "",
+			                "sNext": "",
+			                "sPrevious": ""
+			            },
+		        	"sEmptyTable": "No results found",
+		        	"sInfoEmpty": "No results found",
+		        	"sInfoFiltered": "",
+		        	"sZeroRecords": "No results found",
+		        	"sInfo": "<label>Total results found: </label> _TOTAL_  <span>Page _CURRENTPAGE_ of _TOTALPAGES_ </span>",
+		        	"sProcessing": "Searching...",
+		        	"sLengthMenu": 'Results per page: '+
+		        		'<a href="#">5</a>'+
+		                '<a href="#">10</a>'+
+		                '<a href="#">15</a>'+
+		                '<a href="#">20</a>'+
+		                '<a href="#">25</a>'
+		        },
+		        "bProcessing": true,
+		        "bServerSide": true,
+		        "sAjaxSource": data_url_${id},
+		        "fnServerData": function ( sSource, aoData, fnCallback ) {
+		            $.ajax( {
+		                dataType: 'json',
+		                contentType: "application/json;charset=UTF-8",
+		                type: 'POST',
+		                url: sSource,
+		                data: stringify_aoData(aoData),
+		                success: fnCallback,
+		                error : function (e) {
+		                	$('#error').html(e.responseText);
+		                }
+		            } );
+		        },
+		        "fnServerParams": function ( aoData ) {
+		        	var xtrData = ${extraData};
+		            aoData.push( { "name": "extraData", "value": xtrData } );
+		        },
+		        "fnRowCallback": ${fnRowCallback}
+		        
+		        /* use fnDataTablesPipeline ? */
+		    } )
+	        .columnFilter({ 	
+	        	sPlaceHolder: "head:before",
+	        	sRangeFormat : "From {from} to {to}",
+	        	sRangeSeparator : "&#9999;",
+				aoColumns: ${filtersArray}
+			});
+			
+	        
+	        
+			/* Click event handler */
+		    $('table.display tbody tr').live('click', function () {
+		        var id = this.id;
+		        var index = jQuery.inArray(id, aSelected);
+		        
+		        if ( index === -1 ) {
+		            aSelected.push( id );
+		        } else {
+		            aSelected.splice( index, 1 );
+		        }
+		         
+		        $(this).toggleClass('row_selected');
+		    } );
+			
+			
+			/* To stop sorting on filter events */
+			$(".filterColumn, .filter_column").on("click", function(e){
+			  e.stopPropagation();
+			});
+			
+		} );
+		
+		]]>
+	</script>
+	
+  	<table class="display table table-striped" id="${id}">
+      <thead>
+  		<spring:eval var="colCounter" expression="1" />
+        <tr>
+          <spring:eval var="colCounter" expression="colCounter  + 1" />
+          <!-- <th></th> if expandNode is used -->
+          <c:forTokens items="${columnLabels}" delims="${'&#9999;'}" var="columnHeading"  varStatus="num">
+          	<c:set var="filter" value="${filters[num.count-1]}" />
+          	<spring:eval var="colCounter" expression="colCounter  + 1" />
+          	<c:choose>
+	         <c:when test="${filter eq 'none'}"> <!-- Top <th> is just for filters. It doesn't include headings-->
+		         	<th></th>
+	         </c:when>
+	         <c:otherwise>
+		         	<th><c:out value="${columnHeading}" /></th>
+	         </c:otherwise>
+	        </c:choose>
+          </c:forTokens>
+          <c:if test="${show}">
+            <th></th>
+            <spring:eval var="colCounter" expression="colCounter  + 1" />
+          </c:if>
+          <c:if test="${update}">
+            <th></th>
+            <spring:eval var="colCounter" expression="colCounter  + 1" />
+          </c:if>
+          <c:if test="${delete}">
+            <th></th>
+            <spring:eval var="colCounter" expression="colCounter  + 1" />
+          </c:if>
+        </tr>
+        <spring:eval var="colCounter" expression="1" />
+        <tr>
+        <!-- <th></th> if expandNode is used --><spring:eval var="colCounter" expression="colCounter  + 1" />
+          <c:forTokens items="${columnLabels}" delims="${'&#9999;'}" var="columnHeading"  varStatus="num">
+          	<spring:eval var="colCounter" expression="colCounter  + 1" />
+	        <th><c:out value="${columnHeading}" /></th>
+          </c:forTokens>
+          <c:if test="${show}">
+            <th></th>
+            <spring:eval var="colCounter" expression="colCounter  + 1" />
+          </c:if>
+          <c:if test="${update}">
+            <th></th>
+            <spring:eval var="colCounter" expression="colCounter  + 1" />
+          </c:if>
+          <c:if test="${delete}">
+            <th></th>
+            <spring:eval var="colCounter" expression="colCounter  + 1" />
+          </c:if>
+        </tr>
+      </thead>
+      <tbody>
+	
+	  </tbody>
+	  <tfoot>
+	      <tr class="footer">
+	        <td colspan="${colCounter}">
+	          <c:if test="${empty create or create}">
+	            <span class="new">
+	              <c:choose>
+	              	<c:when test="${empty pathCreate}">
+	              	  <spring:url value="${path}" var="create_url">
+			           	<spring:param name="form" />
+			          </spring:url>	
+	              	</c:when>
+	              	<c:otherwise>
+	              	  <spring:url value="${pathCreate}" var="create_url">
+			           	<spring:param name="form" />
+			          </spring:url>
+	              	</c:otherwise>
+	              </c:choose>
+	              
+
+                    <a href="${create_url}" class="btn btn-large">Добавить</a>
+	            </span>
+	            <c:out value=" " />
+	          </c:if>
+	        </td>
+	      </tr>
+	  </tfoot>
+    </table>
+    
+  </c:if>
+</jsp:root>

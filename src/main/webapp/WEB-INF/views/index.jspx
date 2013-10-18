@@ -1,0 +1,37 @@
+<div xmlns:table="urn:jsptagdir:/WEB-INF/tags/datatables" xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:spring="http://www.springframework.org/tags" xmlns:util="urn:jsptagdir:/WEB-INF/tags/util" xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+  <jsp:directive.page contentType="text/html;charset=UTF-8" />
+  <jsp:output omit-xml-declaration="yes" />
+  <spring:message var="app_name" code="application_name" htmlEscape="false" />
+
+  <br/>
+  <script><![CDATA[
+    	function getExtraData() {
+    		// No extra data
+    	}
+  ]]></script>
+  <c:set value="/tables" var="oPath"/>
+  <c:set var="fnRowCallback"><![CDATA[ 
+	function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
+    	$(nRow).css('cursor', 'pointer');
+    	$(nRow).live('click',function () {
+    		window.location = contextPath+'/tables?key='+aData.key+'&value='+aData.value;
+		});
+    }
+  ]]></c:set>
+  <!--<div>-->
+
+      <!--<table:datatables create="true" delete="false" extraData="getExtraData()" fnRowCallback="${fnRowCallback}" id="l_org_pablog_bookdb_domain_Book" path="${oPath}" show="false" update="false" z="user-managed">-->
+          <!--<table:datacolumn filterType="text" id="c_org_pablog_bookdb_domain_Book_name" property="name" sort="false" z="user-managed"/>-->
+          <!--<table:datacolumn filterType="text" id="c_org_pablog_bookdb_domain_Book_author" property="author" sort="false" z="user-managed"/>-->
+      <!--</table:datatables>-->
+  <!--</div>-->
+
+    <div>
+
+        <table:datatables create="true" delete="false" extraData="getExtraData()" fnRowCallback="${fnRowCallback}" id="l_rw_probs_domain_MyEntry" path="${oPath}" show="false" update="false" z="user-managed">
+            <table:datacolumn filterType="text" id="c_rw_probs_domain_MyEntry_key" property="key" sort="false" z="user-managed"/>
+            <table:datacolumn filterType="text" id="c_rw_probs_domain_MyEntry_value" property="value" sort="false" z="user-managed"/>
+        </table:datatables>
+    </div>
+
+</div>

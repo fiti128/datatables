@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<div xmlns:field="urn:jsptagdir:/WEB-INF/tags/form/fields" xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:page="urn:jsptagdir:/WEB-INF/tags/form" version="2.0">
+    <jsp:directive.page contentType="text/html;charset=UTF-8"/>
+    <jsp:output omit-xml-declaration="yes"/>
+    <page:show id="ps_org_pablog_bookdb_domain_Book" object="${book}" path="/books" z="I9ySK0iXzo1kb0E0BCvYTsFJd2Q=">
+        <field:display field="name" id="s_org_pablog_bookdb_domain_Book_name" object="${book}" z="8rp6YXz/l462P5hVBOJLjj7DQ7M="/>
+        <field:display field="description" id="s_org_pablog_bookdb_domain_Book_description" object="${book}" z="YU8DaIHyBaGYz+YeOIWag6HsP6U="/>
+        <field:display field="author" id="s_org_pablog_bookdb_domain_Book_author" object="${book}" z="dJfWpXE/fgiIOJJTGOEeg3Jjkqg="/>
+        <field:display field="publisher" id="s_org_pablog_bookdb_domain_Book_publisher" object="${book}" z="rMH32m/DcaDqXisKhUWLcgzjDAU="/>
+        <field:display field="pages" id="s_org_pablog_bookdb_domain_Book_pages" object="${book}" z="grCVAWduia64CNuvXFvZ20lY3g8="/>
+        <field:display date="true" dateTimePattern="${book_datepublished_date_format}" field="datePublished" id="s_org_pablog_bookdb_domain_Book_datePublished" object="${book}" z="WQ5gFIPI6N++MRPi7+68U6MJivE="/>
+        <field:display field="isbn" id="s_org_pablog_bookdb_domain_Book_isbn" object="${book}" z="0cwwkTFlBSGlELcZ53Q/NtMbvPs="/>
+    </page:show>
+</div>

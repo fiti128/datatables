@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<div xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:page="urn:jsptagdir:/WEB-INF/tags/form" xmlns:table="urn:jsptagdir:/WEB-INF/tags/form/fields" version="2.0">
+    <jsp:directive.page contentType="text/html;charset=UTF-8"/>
+    <jsp:output omit-xml-declaration="yes"/>
+    <page:list id="pl_org_pablog_bookdb_domain_Book" items="${books}" z="hz+tqp5bq1H79aB91cWOMLb8G5A=">
+        <table:table data="${books}" id="l_org_pablog_bookdb_domain_Book" path="/books" z="QCEY5T7LZckQe/DwZAFKEt2fWIU=">
+            <table:column id="c_org_pablog_bookdb_domain_Book_name" property="name" z="VPaojuBqdE+b3e7lr0tlRidZsvo="/>
+            <table:column id="c_org_pablog_bookdb_domain_Book_description" property="description" z="ZHJCCwL/Ew6KA3XxsUlwovRMNks="/>
+            <table:column id="c_org_pablog_bookdb_domain_Book_author" property="author" z="8VC60S3I/EiSrtcw5xOWpZfiTj0="/>
+            <table:column id="c_org_pablog_bookdb_domain_Book_publisher" property="publisher" z="Itml13ss2Fb7z0fDOA6CcQlMcZE="/>
+            <table:column id="c_org_pablog_bookdb_domain_Book_pages" property="pages" z="FEfWr9CiqH7BsYP4/7+6YVv9K+I="/>
+            <table:column id="c_org_pablog_bookdb_domain_Book_isbn" property="isbn" z="LSqIMBXrOsCWj4jDhJUM3o8/yu0="/>
+        </table:table>
+    </page:list>
+</div>

@@ -1,0 +1,15 @@
+<div id="header" xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:fn="http://java.sun.com/jsp/jstl/functions" xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:spring="http://www.springframework.org/tags" version="2.0">
+  <jsp:directive.page contentType="text/html;charset=UTF-8" />
+  <jsp:output omit-xml-declaration="yes" />
+
+  <spring:url var="dt" value="/resources/images/DataTables.jpg" />
+  <spring:url var="roo" value="/resources/images/roo.jpeg" />
+  <spring:url var="hibernate" value="/resources/images/hibernate.jpeg" />
+  <spring:url var="home" value="/" />
+  <spring:message code="button_home" var="home_label" htmlEscape="false" />
+  <a href="${home}" name="${fn:escapeXml(home_label)}" title="${fn:escapeXml(home_label)}">
+    <img src="${dt}" />
+    <img src="${roo}" />
+    <img src="${hibernate}" />
+  </a>
+</div> 

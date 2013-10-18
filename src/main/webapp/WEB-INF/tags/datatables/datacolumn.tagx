@@ -1,0 +1,114 @@
+<jsp:root xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:fn="http://java.sun.com/jsp/jstl/functions" xmlns:util="urn:jsptagdir:/WEB-INF/tags/util" xmlns:spring="http://www.springframework.org/tags" xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+  <jsp:output omit-xml-declaration="yes" />
+
+  <jsp:directive.attribute name="id" type="java.lang.String" required="true" rtexprvalue="true" description="The identifier for this tag (do not change!)" />
+  <jsp:directive.attribute name="property" type="java.lang.String" required="true" rtexprvalue="true" description="The property (field name) of the dataset to be displayed in a column (required)." />
+  <jsp:directive.attribute name="width" type="java.lang.String" required="false" rtexprvalue="true" description="The column width in pixels (optional)." />
+  <jsp:directive.attribute name="label" type="java.lang.String" required="false" rtexprvalue="true" description="The column label to be used in the table (optional)." />
+  <jsp:directive.attribute name="date" type="java.lang.Boolean" required="false" rtexprvalue="true" description="Indicate that this field is of type java.util.Date" />
+  <jsp:directive.attribute name="calendar" type="java.lang.Boolean" required="false" rtexprvalue="true" description="Indicate that this field is of type java.util.Calendar" />
+  <jsp:directive.attribute name="dateTimePattern" type="java.lang.String" required="false" rtexprvalue="true" description="The date / time pattern to use if the field is a date or calendar type" />
+  <jsp:directive.attribute name="render" type="java.lang.Boolean" required="false" rtexprvalue="true" description="Indicate if the contents of this tag and all enclosed tags should be rendered (default 'true')" />
+  <jsp:directive.attribute name="sort" type="java.lang.Boolean" required="false" rtexprvalue="true" description="Show sorting commands. (default false)" />
+  <jsp:directive.attribute name="filterType" type="java.lang.String" required="false" rtexprvalue="true" description="The type of the field. Supported types are:&lt;br/&gt; none, number, text, select, number-range, date-range" />
+  <jsp:directive.attribute name="filterValues" type="java.util.Collection" required="false" rtexprvalue="true" description="If type is 'select', the name of the collection displayed in the select box" />
+  <jsp:directive.attribute name="itemLabel" type="java.lang.String" required="false" rtexprvalue="true" description="If type is 'select', the name of the property to be used as label" />
+  <jsp:directive.attribute name="itemValue" type="java.lang.String" required="false" rtexprvalue="true" description="If type is 'select', the name of the property to be used as value" />
+  <jsp:directive.attribute name="z" type="java.lang.String" required="false" description="Used for checking if element has been modified (to recalculate simply provide empty string value)" />
+
+<!-- (string, numeric, date and html (which will strip HTML tags before sorting)) http://www.datatables.net/usage/columns#sType. -->
+
+  <c:if test="${empty render or render}">
+     <c:if test="${empty filterType}">
+       <c:set var="filterType" value="none" />
+     </c:if>
+     <c:if test="${empty sort}"> <!-- TODO if there isn't at least one sortable column  SyntaxError: ...,"bSortable":, -->
+       <c:set var="sort" value="false" />
+    </c:if>
+    <c:if test="${empty label}">
+       <spring:message code="label_${fn:toLowerCase(fn:substringAfter(id,'_'))}" var="label" htmlEscape="false" />
+    </c:if>
+    <c:if test="${empty width}">
+       <c:set var="width" value="null" />
+    </c:if>
+    <c:if test="${empty dateTimePattern}">
+       <c:set value="mm/dd/yyyy" var="dateTimePattern" />
+    </c:if>
+    
+    <c:set var="filterValuesArr" value="["/>
+    <c:if test="${not empty filterValues}">
+    	<c:forEach items="${filterValues}" var="value">
+    		<c:choose>
+    			<c:when test="${not empty itemLabel and not empty itemValue}">
+    				<c:set var="filterValuesArr" value='${filterValuesArr}{"label": "${value[itemLabel]}", "value": "${value[itemValue]}"}, '/>
+    			</c:when>
+    			<c:otherwise>
+    				<c:set var="filterValuesArr" value="${filterValuesArr}'${value}', "/>
+    			</c:otherwise>
+    		</c:choose>
+    	</c:forEach>
+    	<c:set var="filterValuesArr" value="${fn:substring(filterValuesArr, 0, fn:length(filterValuesArr)-2) }" /><!-- filterValuesArr is 'A', 'B', 'C', ... -->
+    </c:if>
+    <c:set var="filterValuesArr" value="${filterValuesArr}]"/>
+     
+    <c:choose>
+      <c:when test="${date and empty columnTypes}">
+        <c:set var="columnTypes" value="date" scope="request" />
+        <c:set var="columnDatePatterns" value="${dateTimePattern}" scope="request" />
+      </c:when>
+      <c:when test="${date and not empty columnTypes}">
+        <c:set var="columnTypes" value="${columnTypes}&#9999;date" scope="request" />
+        <c:set var="columnDatePatterns" value="${columnDatePatterns}&#9999;${dateTimePattern}" scope="request" />
+      </c:when>
+      <c:when test="${calendar and empty columnTypes}">
+        <c:set var="columnTypes" value="calendar" scope="request" />
+        <c:set var="columnDatePatterns" value="${dateTimePattern}" scope="request" />
+      </c:when>
+      <c:when test="${calendar and not empty columnTypes}">
+        <c:set var="columnTypes" value="${columnTypes}&#9999;calendar" scope="request" />
+        <c:set var="columnDatePatterns" value="${columnDatePatterns}&#9999;${dateTimePattern}" scope="request" />
+      </c:when>
+      <c:when test="${empty columnTypes}">
+        <c:set var="columnTypes" value="default" scope="request" />
+        <c:set var="columnDatePatterns" value="none" scope="request" />
+      </c:when>
+      <c:otherwise>
+        <c:set var="columnTypes" value="${columnTypes}&#9999;default" scope="request" />
+        <c:set var="columnDatePatterns" value="${columnDatePatterns}&#9999;none" scope="request" />
+      </c:otherwise>
+    </c:choose>
+
+    <c:choose>
+      <c:when test="${empty columnProperties and empty columnLabels}">
+        <c:set var="columnProperties" value="${property}" scope="request" />
+        <c:set var="columnLabels" value="${label}" scope="request" />
+        <c:set var="columnWidths" value="${width}" scope="request" />
+      </c:when>
+      <c:otherwise>
+        <c:set var="columnProperties" value="${columnProperties}&#9999;${property}" scope="request" />
+        <c:set var="columnLabels" value="${columnLabels}&#9999;${label}" scope="request" />
+        <c:set var="columnWidths" value="${columnWidths}&#9999;${width}" scope="request" />
+      </c:otherwise>
+    </c:choose>
+    
+    <c:choose>
+      <c:when test="${empty columnFilters and empty columnSelectFiltersValues}">
+        <c:set var="columnFilters" value="${filterType}" scope="request" />
+        <c:set var="columnSelectFiltersValues" value="${filterValuesArr}" scope="request" />
+      </c:when>
+      <c:otherwise>
+        <c:set var="columnFilters" value="${columnFilters}&#9999;${filterType}" scope="request" />
+        <c:set var="columnSelectFiltersValues" value="${columnSelectFiltersValues}&#9999;${filterValuesArr}" scope="request" />
+      </c:otherwise>
+    </c:choose>
+    
+    <c:choose>
+      <c:when test="${empty columnSorts}">
+        <c:set var="columnSorts" value="${sort}" scope="request" />
+      </c:when>
+      <c:otherwise>
+        <c:set var="columnSorts" value="${columnSorts}&#9999;${sort}" scope="request" />
+      </c:otherwise>
+    </c:choose>
+  </c:if>
+</jsp:root>
